@@ -6,10 +6,19 @@ class BytebankApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        body: ListaTransferencias(),
+      home: ListaTransferencias(),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: Colors.deepPurple,
+        ).copyWith(
+          secondary: Colors.deepPurpleAccent,
+        ),
+        buttonTheme: ButtonThemeData(
+            buttonColor: Colors.deepPurple,
+            textTheme: ButtonTextTheme.primary
+        ),
       ),
-    );
+      );
   }
 }
 
@@ -24,31 +33,35 @@ class FormularioTransferencia extends StatelessWidget {
       appBar: AppBar(
         title: Text('Criando Transferências'),
       ),
-      body: Column(
-        children: <Widget>[
-        Editor(controlador: _controladorNumeroConta, rotulo: '0000', dica: 'Numero Conta', icone: null ),
-          Editor(controlador: _controladorValor, rotulo: '0.00', dica: 'Valor', icone: Icons.monetization_on),
-          ElevatedButton(
-            child: Text('Confirmar'),
-            onPressed: () {
-              _criaTransferencia();
-            },
-          ),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+          Editor(controlador: _controladorNumeroConta, rotulo: '0000', dica: 'Numero Conta', icone: null ),
+            Editor(controlador: _controladorValor, rotulo: '0.00', dica: 'Valor', icone: Icons.monetization_on),
+            ElevatedButton(
+              child: Text('Confirmar'),
+              onPressed: () {
+                _criaTransferencia(context);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 
 
 
-  void _criaTransferencia() {
+  void _criaTransferencia(BuildContext context) {
     final int? numeroConta = int.tryParse(_controladorNumeroConta.text);
     final double? valor = double.tryParse(_controladorValor.text);
     if(numeroConta != null && valor != null){
       final transferenciaCriada = Transferencia(valor, numeroConta);
       debugPrint('$transferenciaCriada');
+      Navigator.pop(context, transferenciaCriada);
     }
   }
+
 }
 
 class Transferencia {
@@ -82,30 +95,43 @@ class ItemTransferencia extends StatelessWidget {
 }
 
 
-class ListaTransferencias extends StatelessWidget {
-
-
+class ListaTransferencias extends StatefulWidget{
+  final List<Transferencia> _transferencias = List.empty(growable: true);
 
   @override
+  State<StatefulWidget> createState() {
+    return ListaTransferenciasState();
+  }
+}
+
+
+class ListaTransferenciasState extends State<ListaTransferencias> {
+  @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       appBar: AppBar(
         title: Text('Transferências'),
       ),
-      body: Column(children: <Widget>[
-        ItemTransferencia(Transferencia(100.0, 1000)),
-        ItemTransferencia(Transferencia(200.0, 2000)),
-        ItemTransferencia(Transferencia(300.0, 3000)),
-      ]),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return FormularioTransferencia();
-          }));
+      body: ListView.builder(
+        itemCount: widget._transferencias.length,
+        itemBuilder: (context, indice) {
+          final transferencia = widget._transferencias[indice];
+          return ItemTransferencia(transferencia);
         },
-        child: Icon(Icons.add),
       ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add), onPressed: () {
+        final Future future = Navigator.push(context, MaterialPageRoute(builder: (context) {
+          return FormularioTransferencia();
+        }));
+        future.then((transferenciaRecebida) {
+          debugPrint('chegou no then do future');
+          debugPrint('$transferenciaRecebida');
+          if(widget._transferencias != null) {
+            widget._transferencias.add(transferenciaRecebida);
+          }
+        });
+      },),
     );
   }
 }
