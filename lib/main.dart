@@ -26,7 +26,7 @@ class FormularioTransferencia extends StatelessWidget {
       ),
       body: Column(
         children: <Widget>[
-        Editor(controlador: _controladorNumeroConta, rotulo: '0000', dica: 'Numero Conta', icone: Icons.account_balance ),
+        Editor(controlador: _controladorNumeroConta, rotulo: '0000', dica: 'Numero Conta', icone: null ),
           Editor(controlador: _controladorValor, rotulo: '0.00', dica: 'Valor', icone: Icons.monetization_on),
           ElevatedButton(
             child: Text('Confirmar'),
@@ -111,7 +111,7 @@ class Editor extends StatelessWidget {
   final TextEditingController controlador;
   final String rotulo;
   final String dica;
-  final IconData icone;
+  final IconData? icone;
 
   Editor({required this.controlador, required this.rotulo, required this.dica, required this.icone});
 
